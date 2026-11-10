@@ -1,0 +1,8 @@
+node_modules/
+clave-servicio.json
+*.json.key
+GoogleService-Info.plist
+FireFly.xcodeproj/xcuserdata/
+DerivedData/
+.DS_Store
+xcuserdata/

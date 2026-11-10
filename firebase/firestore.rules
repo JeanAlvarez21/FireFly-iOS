@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Reglas de FireFly.
+// - La batería (o el simulador) escribe con la cuenta de servicio del Admin SDK, que no pasa por estas reglas.
+// - La app solo puede: leer su batería, vincularla con la clave del QR, desvincularla
+//   y cambiar «Cargar también con la corriente».
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+
+    match /devices/{deviceId} {
+      allow get, list: if signedIn() && resource.data.ownerUid == request.auth.uid;
+
+      allow update: if signedIn() && (
+        // Vincular: la batería no tiene dueño y la clave escaneada coincide con la del equipo.
+        (resource.data.ownerUid == null
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.claimKey == resource.data.pairingKey
+          && changed().hasOnly(['ownerUid', 'claimKey']))
+        ||
+        // Desvincular.
+        (resource.data.ownerUid == request.auth.uid
+          && request.resource.data.ownerUid == null
+          && changed().hasOnly(['ownerUid', 'claimKey']))
+        ||
+        // Ajustes que el dueño puede cambiar.
+        (resource.data.ownerUid == request.auth.uid
+          && changed().hasOnly(['gridChargingEnabled']))
+      );
+
+      match /outages/{outageId} {
+        allow read: if signedIn()
+          && get(/databases/$(database)/documents/devices/$(deviceId)).data.ownerUid == request.auth.uid;
+      }
+    }
+  }
+}

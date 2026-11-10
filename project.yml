@@ -1,0 +1,57 @@
+name: FireFly
+options:
+  bundleIdPrefix: ec.edu.utpl.firefly
+  deploymentTarget:
+    iOS: "27.0"
+  createIntermediateGroups: true
+  developmentLanguage: es
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    # Reemplazar con el REVERSED_CLIENT_ID de GoogleService-Info.plist (ver README)
+    REVERSED_CLIENT_ID: com.googleusercontent.apps.REEMPLAZAR
+
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    from: 12.0.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: 8.0.0
+
+targets:
+  FireFly:
+    type: application
+    platform: iOS
+    sources:
+      - path: FireFly
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ec.edu.utpl.firefly.app
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: FireFly/Info.plist
+      properties:
+        CFBundleDisplayName: FireFly
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        NSCameraUsageDescription: FireFly usa la cámara para leer el código QR de tu batería.
+        CFBundleURLTypes:
+          - CFBundleURLName: google
+            CFBundleURLSchemes: [$(REVERSED_CLIENT_ID)]
+          - CFBundleURLName: firefly
+            CFBundleURLSchemes: [firefly]
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
+      - package: GoogleSignIn
+        product: GoogleSignIn
