@@ -12,6 +12,9 @@ final class DemoBackend: Backend {
     private var statusObservers: [UUID: (BatteryStatus) -> Void] = [:]
     private var outageObservers: [UUID: ([PowerOutage]) -> Void] = [:]
     private var timer: Timer?
+    /// Nivel exacto de la batería con decimales. `status.percent` es solo lo que se muestra
+    /// (redondeado); si se guardara redondeado, los cambios menores a 1 % por tic se perderían.
+    private var level = 75.0
 
     /// Cada tic del temporizador (3 s) avanza 5 minutos simulados.
     private let simulatedMinutesPerTick = 5.0
@@ -114,22 +117,23 @@ final class DemoBackend: Backend {
         let sun = max(0, sin((hour - 6) / 12 * .pi))
         status.solarWatts = (sun * 22).rounded()
         let usableWh = BatteryStatus.capacityWh * BatteryStatus.usableFraction
-        var pct = Double(status.percent)
         if status.state == .battery {
-            let netW = status.routerWatts - status.solarWatts
-            pct -= max(0, netW) * simulatedMinutesPerTick / 60 / usableWh * 100
+            // En el demo la descarga usa todo el consumo del router (sin restar el sol)
+            // para que se vea bajar y coincida con el «Internet restante» del panel.
+            level -= status.routerWatts * simulatedMinutesPerTick / 60 / usableWh * 100
         } else {
             let chargeW = status.solarWatts + (status.gridChargingEnabled ? 30 : 0)
-            pct += chargeW * simulatedMinutesPerTick / 60 / usableWh * 100
+            level += chargeW * simulatedMinutesPerTick / 60 / usableWh * 100
         }
-        status.percent = Int(min(100, max(0, pct)).rounded())
+        level = min(100, max(0, level))
+        status.percent = Int(level.rounded())
         recompute()
         publish()
     }
 
     private func recompute() {
         let usableWh = BatteryStatus.capacityWh * BatteryStatus.usableFraction
-        let pct = Double(status.percent)
+        let pct = level
         if status.state == .battery {
             status.charging = false
             status.minutesToFull = nil
