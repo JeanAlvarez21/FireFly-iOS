@@ -67,6 +67,8 @@ final class AppModel {
         deviceId = nil
         status = nil
         outages = []
+        // En el próximo inicio de sesión el tutorial vuelve a aparecer.
+        tutorial.reset()
         phase = .signedOut
     }
 
@@ -103,6 +105,8 @@ final class AppModel {
             self.deviceId = nil
             self.status = nil
             self.outages = []
+            // Al vincular la siguiente batería el tutorial vuelve a aparecer.
+            self.tutorial.reset()
             self.phase = .needsPairing
         }
     }

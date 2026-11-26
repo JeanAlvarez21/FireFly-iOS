@@ -4,8 +4,8 @@ import UIKit
 // MARK: - Controlador
 
 /// Tutorial guiado por la luciérnaga: el punto de estado del panel «despega», oscurece la pantalla
-/// y va iluminando cada parte de la app. Se muestra la primera vez que se llega al panel
-/// (después de iniciar sesión o de vincular la batería) y se puede repetir desde Ajustes.
+/// y va iluminando cada parte de la app. Se muestra al llegar al panel por primera vez y otra vez
+/// después de cada nuevo inicio de sesión o vinculación. También se puede repetir desde Ajustes.
 @MainActor
 @Observable
 final class TutorialController {
@@ -58,6 +58,12 @@ final class TutorialController {
     private var busy = false
 
     var done: Bool { UserDefaults.standard.bool(forKey: Self.doneKey) }
+
+    /// Hace que el tutorial vuelva a mostrarse la próxima vez que se llegue al panel
+    /// (después de cerrar sesión o de desvincular la batería).
+    func reset() {
+        UserDefaults.standard.set(false, forKey: Self.doneKey)
+    }
     var step: Step { Self.steps[index] }
     var isLastStep: Bool { index == Self.steps.count - 1 }
 
