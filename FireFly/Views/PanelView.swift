@@ -31,6 +31,15 @@ struct PanelView: View {
                 ProgressView("Conectando con tu batería…")
                     .tint(Theme.accent)
                     .padding(.top, 120)
+                    // Ocupa todo el ancho: si no, el fondo se angostaba y quedaban franjas negras.
+                    .frame(maxWidth: .infinity)
+                    // Si los datos no llegan, se vuelve a conectar cada segundo y medio.
+                    .task {
+                        while !Task.isCancelled, model.status == nil {
+                            try? await Task.sleep(for: .seconds(1.5))
+                            model.reconnectIfNeeded()
+                        }
+                    }
             }
         }
         .scrollIndicators(.hidden)

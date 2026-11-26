@@ -118,13 +118,28 @@ final class AppModel {
     /// tenga datos y la pantalla esté medida, y lo muestra. Así sale siempre, no solo a veces.
     func runPendingTutorial() async {
         guard tutorialPending else { return }
-        for _ in 0..<60 {
+        // Espera sin límite de tiempo (se cancela si el panel desaparece). Antes, a los 6 s
+        // arrancaba aunque el panel siguiera cargando y oscurecía zonas que no estaban en pantalla.
+        while !Task.isCancelled {
             if status != nil, tutorial.frames[.statusChip] != nil, tutorial.frames[.hero] != nil { break }
             try? await Task.sleep(for: .milliseconds(100))
         }
-        guard !Task.isCancelled, tutorialPending, phase == .ready else { return }
+        guard !Task.isCancelled, tutorialPending, phase == .ready, status != nil else { return }
         tutorial.start(after: 0.4)
         tutorialPending = false
+    }
+
+    // MARK: Conexión
+
+    /// Si el panel está a la vista sin datos de la batería, vuelve a conectarse en vez de
+    /// quedarse en «Conectando con tu batería…» para siempre.
+    func reconnectIfNeeded() {
+        guard phase == .ready, status == nil else { return }
+        if let deviceId {
+            startObserving(deviceId)
+        } else {
+            phase = .needsPairing
+        }
     }
 
     // MARK: Acciones del panel
