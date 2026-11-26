@@ -31,6 +31,8 @@ final class AppModel {
     var selectedTab: AppTab = .home
     /// Tutorial con la luciérnaga.
     let tutorial = TutorialController()
+    /// true después de iniciar sesión o vincular una batería: el panel muestra el tutorial al abrirse.
+    var tutorialPending = false
 
     private var statusSub: Subscription?
     private var outagesSub: Subscription?
@@ -55,6 +57,7 @@ final class AppModel {
         await run {
             let user = try await self.backend.signInWithGoogle()
             self.user = user
+            self.tutorialPending = true
             await self.notifier.requestPermission()
             await self.loadDevice()
         }
@@ -67,8 +70,7 @@ final class AppModel {
         deviceId = nil
         status = nil
         outages = []
-        // En el próximo inicio de sesión el tutorial vuelve a aparecer.
-        tutorial.reset()
+        tutorialPending = false
         phase = .signedOut
     }
 
@@ -94,6 +96,7 @@ final class AppModel {
         guard let deviceId else { return }
         startObserving(deviceId)
         selectedTab = .home
+        tutorialPending = true
         phase = .ready
     }
 
@@ -105,10 +108,23 @@ final class AppModel {
             self.deviceId = nil
             self.status = nil
             self.outages = []
-            // Al vincular la siguiente batería el tutorial vuelve a aparecer.
-            self.tutorial.reset()
             self.phase = .needsPairing
         }
+    }
+
+    // MARK: Tutorial
+
+    /// Lo llama el panel al aparecer: si hay un tutorial pendiente, espera a que la batería
+    /// tenga datos y la pantalla esté medida, y lo muestra. Así sale siempre, no solo a veces.
+    func runPendingTutorial() async {
+        guard tutorialPending else { return }
+        for _ in 0..<60 {
+            if status != nil, tutorial.frames[.statusChip] != nil, tutorial.frames[.hero] != nil { break }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        guard !Task.isCancelled, tutorialPending, phase == .ready else { return }
+        tutorial.start(after: 0.4)
+        tutorialPending = false
     }
 
     // MARK: Acciones del panel

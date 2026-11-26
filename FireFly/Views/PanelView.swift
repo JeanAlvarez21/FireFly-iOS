@@ -12,12 +12,9 @@ struct MainTabView: View {
         }
         .tint(Theme.accent)
         .overlay { TutorialOverlay() }
-        // La primera vez que se llega al panel (después de iniciar sesión o de vincular la batería)
-        // se muestra el tutorial, cuando ya hay datos de la batería en pantalla.
-        .onChange(of: model.status != nil, initial: true) { _, hasStatus in
-            if hasStatus, !model.tutorial.done {
-                model.tutorial.start(after: 0.6)
-            }
+        // Después de iniciar sesión o de vincular una batería se muestra el tutorial.
+        .task(id: model.tutorialPending) {
+            await model.runPendingTutorial()
         }
     }
 }

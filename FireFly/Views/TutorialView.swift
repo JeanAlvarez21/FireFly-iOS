@@ -4,8 +4,8 @@ import UIKit
 // MARK: - Controlador
 
 /// Tutorial guiado por la luciérnaga: el punto de estado del panel «despega», oscurece la pantalla
-/// y va iluminando cada parte de la app. Se muestra al llegar al panel por primera vez y otra vez
-/// después de cada nuevo inicio de sesión o vinculación. También se puede repetir desde Ajustes.
+/// y va iluminando cada parte de la app. Se muestra siempre después de iniciar sesión y después de
+/// vincular una batería (lo pide `AppModel`). También se puede repetir desde Ajustes.
 @MainActor
 @Observable
 final class TutorialController {
@@ -42,8 +42,6 @@ final class TutorialController {
              tab: .stats),
     ]
 
-    private static let doneKey = "tutorial.done"
-
     /// Marcos (en coordenadas de la ventana) de cada zona que explica el tutorial.
     var frames: [Target: CGRect] = [:]
     /// Lo asigna `AppModel` para poder cambiar de pestaña.
@@ -56,19 +54,15 @@ final class TutorialController {
     private(set) var dimVisible = false
     private(set) var cardVisible = false
     private var busy = false
+    /// Animación en curso; se cancela si el tutorial vuelve a empezar.
+    private var flow: Task<Void, Never>?
 
-    var done: Bool { UserDefaults.standard.bool(forKey: Self.doneKey) }
-
-    /// Hace que el tutorial vuelva a mostrarse la próxima vez que se llegue al panel
-    /// (después de cerrar sesión o de desvincular la batería).
-    func reset() {
-        UserDefaults.standard.set(false, forKey: Self.doneKey)
-    }
     var step: Step { Self.steps[index] }
     var isLastStep: Bool { index == Self.steps.count - 1 }
 
+    /// Empieza desde el paso 1. Si había un tutorial a medias, lo reinicia en vez de ignorar la orden.
     func start(after delay: Double = 0) {
-        guard !isActive else { return }
+        flow?.cancel()
         selectTab?(.home)
         index = 0
         perched = true
@@ -76,11 +70,13 @@ final class TutorialController {
         cardVisible = false
         isActive = true
         busy = true
-        Task {
+        flow = Task {
             try? await Task.sleep(for: .seconds(delay + 0.3))
+            guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.35)) { dimVisible = true }
             withAnimation(.spring(duration: 0.9, bounce: 0.3)) { perched = false }
             try? await Task.sleep(for: .milliseconds(550))
+            guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.25)) { cardVisible = true }
             busy = false
         }
@@ -91,7 +87,7 @@ final class TutorialController {
         if isLastStep { finish(); return }
         busy = true
         let nextIndex = index + 1
-        Task {
+        flow = Task {
             withAnimation(.easeOut(duration: 0.15)) { cardVisible = false }
             if Self.steps[nextIndex].tab != step.tab {
                 selectTab?(Self.steps[nextIndex].tab)
@@ -100,8 +96,10 @@ final class TutorialController {
             } else {
                 try? await Task.sleep(for: .milliseconds(150))
             }
+            guard !Task.isCancelled else { return }
             withAnimation(.spring(duration: 0.6, bounce: 0.25)) { index = nextIndex }
             try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else { return }
             withAnimation(.easeOut(duration: 0.25)) { cardVisible = true }
             busy = false
         }
@@ -110,15 +108,16 @@ final class TutorialController {
     /// «Saltar» y «Terminar»: la luciérnaga vuelve a su lugar y la pantalla se aclara.
     func finish() {
         guard isActive else { return }
+        flow?.cancel()
         busy = true
-        UserDefaults.standard.set(true, forKey: Self.doneKey)
-        Task {
+        flow = Task {
             withAnimation(.easeOut(duration: 0.15)) { cardVisible = false }
             selectTab?(.home)
             try? await Task.sleep(for: .milliseconds(300))
             withAnimation(.spring(duration: 0.8, bounce: 0.2)) { perched = true }
             withAnimation(.easeOut(duration: 0.4).delay(0.2)) { dimVisible = false }
             try? await Task.sleep(for: .milliseconds(850))
+            guard !Task.isCancelled else { return }
             isActive = false
             busy = false
         }
