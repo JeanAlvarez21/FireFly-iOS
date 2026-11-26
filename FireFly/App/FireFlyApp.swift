@@ -60,20 +60,23 @@ struct RootView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        ZStack {
-            switch model.phase {
-            case .launching:
-                ProgressView().tint(Theme.accent)
-            case .signedOut:
-                LoginView()
-            case .needsPairing:
-                PairingView()
-            case .ready:
-                MainTabView()
+        // GeometryReader + ignoresSafeArea(.keyboard): el teclado no achica ni empuja las pantallas.
+        GeometryReader { _ in
+            ZStack {
+                switch model.phase {
+                case .launching:
+                    ProgressView().tint(Theme.accent)
+                case .signedOut:
+                    LoginView()
+                case .needsPairing:
+                    PairingView()
+                case .ready:
+                    MainTabView()
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .fireflyScreen()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .fireflyScreen()
         .ignoresSafeArea(.keyboard)
         .animation(.easeOut(duration: 0.25), value: model.phase)
     }

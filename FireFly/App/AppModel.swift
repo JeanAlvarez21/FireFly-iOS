@@ -1,6 +1,11 @@
 import Foundation
 import Observation
 
+/// Pestañas de la barra inferior.
+enum AppTab: Hashable {
+    case home, stats, settings
+}
+
 /// Estado central de la app: sesión, batería vinculada y datos en vivo.
 @MainActor
 @Observable
@@ -22,6 +27,10 @@ final class AppModel {
     var outages: [PowerOutage] = []
     var errorMessage: String?
     var isBusy = false
+    /// Pestaña visible. Después de iniciar sesión o vincular una batería siempre vuelve a Inicio.
+    var selectedTab: AppTab = .home
+    /// Tutorial con la luciérnaga.
+    let tutorial = TutorialController()
 
     private var statusSub: Subscription?
     private var outagesSub: Subscription?
@@ -31,6 +40,7 @@ final class AppModel {
 
     init(backend: Backend) {
         self.backend = backend
+        tutorial.selectTab = { [weak self] tab in self?.selectedTab = tab }
     }
 
     func start() async {
@@ -81,6 +91,7 @@ final class AppModel {
     func finishPairing() {
         guard let deviceId else { return }
         startObserving(deviceId)
+        selectedTab = .home
         phase = .ready
     }
 
@@ -117,6 +128,7 @@ final class AppModel {
             if let id = try await backend.pairedDeviceId(for: user) {
                 deviceId = id
                 startObserving(id)
+                selectedTab = .home
                 phase = .ready
             } else {
                 phase = .needsPairing

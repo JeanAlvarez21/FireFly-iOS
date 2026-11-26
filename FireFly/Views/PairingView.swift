@@ -92,14 +92,17 @@ struct PairingView: View {
         .padding(.horizontal, 24)
         .padding(.top, 12)
         .padding(.bottom, 16)
-        .alert("Código de la batería", isPresented: $showManual) {
-            TextField("FF-0231 CLAVE", text: $manualCode)
-                .textInputAutocapitalization(.characters)
-                .autocorrectionDisabled()
-            Button("Vincular") { Task { await submit(manualCode) } }
-            Button("Cancelar", role: .cancel) {}
-        } message: {
-            Text("Escribe el código que aparece debajo del QR (por ejemplo, FF-0231 y la clave).")
+        // El teclado del código manual no debe empujar la pantalla hacia arriba.
+        .ignoresSafeArea(.keyboard)
+        // Panel propio en vez de una alerta del sistema: la alerta con campo de texto movía la pantalla.
+        .sheet(isPresented: $showManual) {
+            ManualCodeSheet(code: $manualCode) {
+                showManual = false
+                Task { await submit(manualCode) }
+            }
+            .presentationDetents([.height(300)])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(Theme.surface)
         }
     }
 
@@ -201,5 +204,52 @@ struct QRScannerView: UIViewControllerRepresentable {
                 }
             }
         }
+    }
+}
+
+/// Panel para escribir a mano el código que está debajo del QR.
+struct ManualCodeSheet: View {
+    @Binding var code: String
+    var onSubmit: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Código de la batería").font(Theme.display(22))
+            Text("Escribe el código que aparece debajo del QR (por ejemplo, FF-0231 y la clave).")
+                .font(.system(size: 15))
+                .foregroundStyle(Theme.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            TextField("FF-0231 CLAVE", text: $code)
+                .font(.system(size: 17, weight: .semibold))
+                .textInputAutocapitalization(.characters)
+                .autocorrectionDisabled()
+                .submitLabel(.go)
+                .focused($focused)
+                .onSubmit { if !code.isEmpty { onSubmit() } }
+                .padding(.horizontal, 16)
+                .frame(minHeight: 52)
+                .background(Theme.background, in: .rect(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.border))
+            HStack(spacing: 12) {
+                Button("Cancelar") { dismiss() }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Theme.text)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(Theme.background, in: .rect(cornerRadius: 14))
+                Button("Vincular", action: onSubmit)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Theme.onAccent)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(Theme.accent.opacity(code.isEmpty ? 0.4 : 1), in: .rect(cornerRadius: 14))
+                    .disabled(code.isEmpty)
+            }
+        }
+        .foregroundStyle(Theme.text)
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .onAppear { focused = true }
     }
 }

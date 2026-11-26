@@ -27,6 +27,7 @@ struct HistoryView: View {
                             .accessibilityAddTraits(p == period ? .isSelected : [])
                     }
                 }
+                .tutorialTarget(.historyFilters, model.tutorial)
 
                 HStack(spacing: 10) {
                     StatTile(title: "Cortes", value: "\(summary.outageCount)")
@@ -64,6 +65,7 @@ struct HistoryView: View {
                 }
                 .padding(16)
                 .background(Theme.surface, in: .rect(cornerRadius: 20))
+                .tutorialTarget(.historyChart, model.tutorial)
 
                 Text("Últimos cortes").font(.system(size: 16, weight: .bold)).padding(.top, 4)
                 if model.outages.isEmpty {

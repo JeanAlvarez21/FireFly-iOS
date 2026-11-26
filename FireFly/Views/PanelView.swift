@@ -1,13 +1,24 @@
 import SwiftUI
 
 struct MainTabView: View {
+    @Environment(AppModel.self) private var model
+
     var body: some View {
-        TabView {
-            Tab("Inicio", systemImage: "house") { PanelView() }
-            Tab("Estadísticas", systemImage: "chart.bar") { HistoryView() }
-            Tab("Ajustes", systemImage: "gearshape") { SettingsView() }
+        @Bindable var model = model
+        TabView(selection: $model.selectedTab) {
+            Tab("Inicio", systemImage: "house", value: AppTab.home) { PanelView() }
+            Tab("Estadísticas", systemImage: "chart.bar", value: AppTab.stats) { HistoryView() }
+            Tab("Ajustes", systemImage: "gearshape", value: AppTab.settings) { SettingsView() }
         }
         .tint(Theme.accent)
+        .overlay { TutorialOverlay() }
+        // La primera vez que se llega al panel (después de iniciar sesión o de vincular la batería)
+        // se muestra el tutorial, cuando ya hay datos de la batería en pantalla.
+        .onChange(of: model.status != nil, initial: true) { _, hasStatus in
+            if hasStatus, !model.tutorial.done {
+                model.tutorial.start(after: 0.6)
+            }
+        }
     }
 }
 
@@ -41,12 +52,16 @@ struct PanelView: View {
                 }
                 Spacer()
                 HStack(spacing: 8) {
+                    // Este punto es la luciérnaga: durante el tutorial «despega» y guía al usuario.
                     Circle().fill(outage ? Theme.warning : Theme.accent).frame(width: 8, height: 8)
+                        .opacity(model.tutorial.isActive ? 0 : 1)
+                        .tutorialTarget(.statusDot, model.tutorial)
                     Text(outage ? "Con batería" : "Con luz").font(.system(size: 13, weight: .semibold))
                 }
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(Theme.surface, in: .capsule)
                 .accessibilityElement(children: .combine)
+                .tutorialTarget(.statusChip, model.tutorial)
             }
 
             if model.isDemo { DemoBadge() }
@@ -82,11 +97,13 @@ struct PanelView: View {
             }
             .padding(.vertical, 22).padding(.horizontal, 20)
             .background(Theme.surface, in: .rect(cornerRadius: 24))
+            .tutorialTarget(.hero, model.tutorial)
 
             HStack(spacing: 12) {
                 MiniCard(title: "Panel solar", value: Formatters.watts(s.solarWatts), icon: "sun.max", iconColor: Theme.accent)
                 MiniCard(title: "Router", value: Formatters.watts(s.routerWatts), icon: "wifi.router", iconColor: Theme.textSecondary)
             }
+            .tutorialTarget(.energyCards, model.tutorial)
 
             Card {
                 Toggle(isOn: Binding(get: { s.gridChargingEnabled },
@@ -99,6 +116,7 @@ struct PanelView: View {
                 }
                 .tint(Theme.accent)
             }
+            .tutorialTarget(.gridToggle, model.tutorial)
 
             Text(outage ? "Corte actual desde las \(Formatters.time(s.outageStart ?? .now))."
                         : "Último uso de la batería: \(s.lastBatteryUse.map(Formatters.dateTime) ?? "todavía no").")

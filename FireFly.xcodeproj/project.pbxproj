@@ -19,6 +19,7 @@
 		98E2EC6991275A2CDB873A90 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 67BB8EE4C302F6C8B145272F /* Assets.xcassets */; };
 		A1E121C776C95963C030FEEF /* HistoryStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDBDFEFBDD2A93F70D849986 /* HistoryStats.swift */; };
 		A87DB4E153B833DD54A2D7EC /* Backend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C27EF3A167F8BEB4A9E4783 /* Backend.swift */; };
+		BD59B9D1B76D07011C9B0289 /* TutorialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA70B4B1C20F816D99B2CE76 /* TutorialView.swift */; };
 		C1E79E5878657AB20C668ABD /* FireFlyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028AA8F64C264E3D2B5B6CD3 /* FireFlyApp.swift */; };
 		CEB78D31A5DE24FD4D176C3C /* PairingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1D058EEE150B5EAF260893D /* PairingView.swift */; };
 		CFCB24538D87DF48D483A7F3 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B567192B2384D23F981C1A16 /* Notifier.swift */; };
@@ -32,7 +33,7 @@
 		1625D23E1602E3FF8AF3C59B /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		1C27EF3A167F8BEB4A9E4783 /* Backend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Backend.swift; sourceTree = "<group>"; };
 		2B202DAEA70014B5882D7306 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		30AC97838E72AE162041B232 /* FireFly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FireFly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		30AC97838E72AE162041B232 /* FireFly.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FireFly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31A64FEF4A7F0BD9B1705A63 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		3E9FBF0415DF3E21A4AEF701 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		43FCC9F2F3CF8E25848FE5C9 /* PanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelView.swift; sourceTree = "<group>"; };
@@ -44,6 +45,7 @@
 		A0D97DDE78CFD097918A69F2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B1D058EEE150B5EAF260893D /* PairingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PairingView.swift; sourceTree = "<group>"; };
 		B567192B2384D23F981C1A16 /* Notifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notifier.swift; sourceTree = "<group>"; };
+		CA70B4B1C20F816D99B2CE76 /* TutorialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialView.swift; sourceTree = "<group>"; };
 		EDBDFEFBDD2A93F70D849986 /* HistoryStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStats.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -105,6 +107,7 @@
 				B1D058EEE150B5EAF260893D /* PairingView.swift */,
 				43FCC9F2F3CF8E25848FE5C9 /* PanelView.swift */,
 				6F1DBC416ED89CE90F9BA4AD /* SettingsView.swift */,
+				CA70B4B1C20F816D99B2CE76 /* TutorialView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -180,7 +183,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2720;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					4B277299D5B9179C667197C4 = {
+						DevelopmentTeam = "";
+					};
+				};
 			};
 			buildConfigurationList = 086C7F0782D25D04872810CF /* Build configuration list for PBXProject "FireFly" */;
 			developmentRegion = es;
@@ -235,6 +243,7 @@
 				764E642F804B3CCCD75ADAE1 /* PanelView.swift in Sources */,
 				2AF990443EEC587138E75264 /* SettingsView.swift in Sources */,
 				3FEFD195BB6789AB9D7D2456 /* Theme.swift in Sources */,
+				BD59B9D1B76D07011C9B0289 /* TutorialView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,10 +320,9 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = HKJ6RR59G7;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -337,7 +345,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REVERSED_CLIENT_ID = com.googleusercontent.apps.REEMPLAZAR;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -380,10 +387,9 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = HKJ6RR59G7;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -399,7 +405,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REVERSED_CLIENT_ID = com.googleusercontent.apps.REEMPLAZAR;
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;

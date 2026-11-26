@@ -52,6 +52,23 @@ struct SettingsView: View {
                         .font(.system(size: 12)).foregroundStyle(Theme.textSecondary)
                 }
 
+                section("Ayuda")
+                group {
+                    Button {
+                        model.tutorial.start(after: 0.3)
+                    } label: {
+                        HStack {
+                            Text("Ver el tutorial").font(.system(size: 15, weight: .semibold))
+                            Spacer()
+                            Image(systemName: "sparkles")
+                        }
+                        .foregroundStyle(Theme.accent)
+                        .frame(minHeight: 48)
+                        .padding(.horizontal, 16)
+                        .contentShape(Rectangle())
+                    }
+                }
+
                 section("Cuenta")
                 group {
                     row("Cuenta de Google", model.user?.firstName ?? "—")
